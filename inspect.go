@@ -41,5 +41,9 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, fmt.Errorf("invalid path %q: must be /<owner>/<repository>", parsedURL.Path)
 	}
 
+	if pathParts[1] == "" || pathParts[2] == "" {
+		return RepoInfo{}, fmt.Errorf("invalid path %q: must be /<owner>/<repository>", parsedURL.Path)
+	}
+
 	return RepoInfo{pathParts[1], pathParts[2], rawURL}, err
 }
