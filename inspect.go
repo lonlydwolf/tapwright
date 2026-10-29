@@ -7,9 +7,9 @@ import (
 )
 
 type RepoInfo struct {
-	owner        string
-	repository   string
-	canonicalURL string
+	Owner        string
+	Repository   string
+	CanonicalURL string
 }
 
 func inspect(rawURL string) (RepoInfo, error) {

@@ -15,9 +15,9 @@ func TestInspect(t *testing.T) {
 			name:  "valid url",
 			input: "https://github.com/octocat/Hello-World",
 			want: RepoInfo{
-				owner:        "octocat",
-				repository:   "Hello-World",
-				canonicalURL: "https://github.com/octocat/Hello-World",
+				Owner:        "octocat",
+				Repository:   "Hello-World",
+				CanonicalURL: "https://github.com/octocat/Hello-World",
 			},
 			wantErr: false,
 		},
