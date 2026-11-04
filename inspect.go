@@ -7,9 +7,9 @@ import (
 )
 
 type RepoInfo struct {
-	Owner        string
-	Repository   string
-	CanonicalURL string
+	Owner        string `json:"owner"`
+	Repository   string `json:"repository"`
+	CanonicalURL string `json:"canonical_url"`
 }
 
 func inspect(rawURL string) (RepoInfo, error) {
