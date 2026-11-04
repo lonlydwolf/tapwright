@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -39,6 +40,10 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, fmt.Errorf("URL must not include fragment")
 	}
 
+	if strings.Contains(parsedURL.EscapedPath(), "%") {
+		return RepoInfo{}, fmt.Errorf("invalid path %q: must not include percent-encoded path components", parsedURL.EscapedPath())
+	}
+
 	pathParts := strings.Split(parsedURL.Path, "/")
 
 	if len(pathParts) != 3 {
@@ -48,6 +53,11 @@ func inspect(rawURL string) (RepoInfo, error) {
 	if pathParts[1] == "" || pathParts[1] == "." || pathParts[1] == ".." ||
 		pathParts[2] == "" || pathParts[2] == "." || pathParts[2] == ".." {
 		return RepoInfo{}, fmt.Errorf("invalid path %q: must be /<owner>/<repository>", parsedURL.Path)
+	}
+
+	var repoRegex = regexp.MustCompile(`^[a-zA-Z0-9_.-]+$`)
+	if !repoRegex.MatchString(pathParts[1]) || !repoRegex.MatchString(pathParts[2]) {
+		return RepoInfo{}, fmt.Errorf("inavlid path %q: each component may contain only ASCII letters, digits, hyphens, underscores, and periods", parsedURL.Path)
 	}
 
 	return RepoInfo{pathParts[1], pathParts[2], rawURL}, err
