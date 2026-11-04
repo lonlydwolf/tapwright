@@ -177,6 +177,48 @@ func TestInspect(t *testing.T) {
 			want:    RepoInfo{},
 			wantErr: true,
 		},
+
+		{
+			name:    "invalid url (with port)",
+			input:   "https://github.com:443/octocat/repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid path (trailing slashes)",
+			input:   "https://github.com/octocat/repo/",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url (case sensitivity)",
+			input:   "HTTPS://GitHub.COM/octocat/repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url",
+			input:   "https:///octocat/repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url",
+			input:   "https:///octocat/repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url",
+			input:   "https://github.com//repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
 	}
 
 	for _, tc := range tests {
