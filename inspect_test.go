@@ -189,7 +189,7 @@ func TestInspect(t *testing.T) {
 			}
 
 			if got != tc.want {
-				t.Errorf("inxpect() got = %v, want %v", got, tc.want)
+				t.Errorf("inspect() got = %v, want %v", got, tc.want)
 			}
 
 		})

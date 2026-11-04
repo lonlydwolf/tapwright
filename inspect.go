@@ -57,7 +57,7 @@ func inspect(rawURL string) (RepoInfo, error) {
 
 	var repoRegex = regexp.MustCompile(`^[a-zA-Z0-9_.-]+$`)
 	if !repoRegex.MatchString(pathParts[1]) || !repoRegex.MatchString(pathParts[2]) {
-		return RepoInfo{}, fmt.Errorf("inavlid path %q: each component may contain only ASCII letters, digits, hyphens, underscores, and periods", parsedURL.Path)
+		return RepoInfo{}, fmt.Errorf("invalid path %q: each component may contain only ASCII letters, digits, hyphens, underscores, and periods", parsedURL.Path)
 	}
 
 	return RepoInfo{pathParts[1], pathParts[2], rawURL}, err
