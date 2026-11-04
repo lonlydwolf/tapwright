@@ -106,7 +106,7 @@ program_status=$?
 
 echo "Testing: \`tapwright inspect https://github.com/lonlydwolf/tapwright\`"
 
-printf '{"Owner":"lonlydwolf","Repository":"tapwright","CanonicalURL":"https://github.com/lonlydwolf/tapwright"}\n' >/tmp/tapwright.expected
+printf '{"owner":"lonlydwolf","repository":"tapwright","canonical_url":"https://github.com/lonlydwolf/tapwright"}\n' >/tmp/tapwright.expected
 
 if [ "$program_status" -ne 0 ]; then
   printf 'FAIL: expected exit status 0; got %s\n' "$program_status" >&2
