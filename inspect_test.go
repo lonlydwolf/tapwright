@@ -23,6 +23,58 @@ func TestInspect(t *testing.T) {
 		},
 
 		{
+			name:  "valid url",
+			input: "https://github.com/octocat/repo_123.git",
+			want: RepoInfo{
+				Owner:        "octocat",
+				Repository:   "repo_123.git",
+				CanonicalURL: "https://github.com/octocat/repo_123.git",
+			},
+			wantErr: false,
+		},
+
+		{
+			name:    "invalid url",
+			input:   "https://github.com/octocat/repo!",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url",
+			input:   "https://github.com/octocat/répo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+		{
+			name:    "invalid url",
+			input:   "https://github.com/octocat/repo~test",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url (Percent-encoded path components)",
+			input:   "https://github.com/octocat/%48ello",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url (Percent-encoded path components)",
+			input:   "https://github.com/%6Fctocat/repo",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid url (Percent-encoded path components)",
+			input:   "https://github.com/octocat/repo%2Egit",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
 			name:    "invalid scheme",
 			input:   "http://github.com/octocat/Hello-World",
 			want:    RepoInfo{},
