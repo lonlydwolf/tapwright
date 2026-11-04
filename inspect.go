@@ -23,15 +23,19 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, fmt.Errorf("invalid scheme %q: must be https", parsedURL.Scheme)
 	}
 
+	if parsedURL.User != nil {
+		return RepoInfo{}, fmt.Errorf("URL must not include credentials")
+	}
+
 	if parsedURL.Host != "github.com" {
 		return RepoInfo{}, fmt.Errorf("invalid host %q: must be github.com", parsedURL.Host)
 	}
 
-	if parsedURL.RawQuery != "" {
+	if parsedURL.RawQuery != "" || parsedURL.ForceQuery {
 		return RepoInfo{}, fmt.Errorf("URL must not include query")
 	}
 
-	if parsedURL.Fragment != "" {
+	if strings.Contains(rawURL, "#") {
 		return RepoInfo{}, fmt.Errorf("URL must not include fragment")
 	}
 
@@ -41,7 +45,8 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, fmt.Errorf("invalid path %q: must be /<owner>/<repository>", parsedURL.Path)
 	}
 
-	if pathParts[1] == "" || pathParts[2] == "" {
+	if pathParts[1] == "" || pathParts[1] == "." || pathParts[1] == ".." ||
+		pathParts[2] == "" || pathParts[2] == "." || pathParts[2] == ".." {
 		return RepoInfo{}, fmt.Errorf("invalid path %q: must be /<owner>/<repository>", parsedURL.Path)
 	}
 
