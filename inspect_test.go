@@ -77,6 +77,54 @@ func TestInspect(t *testing.T) {
 			want:    RepoInfo{},
 			wantErr: true,
 		},
+
+		{
+			name:    "embedded user credentials",
+			input:   "https://user:pass@github.com/octocat/Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "empty query",
+			input:   "https://github.com/octocat/Hello-World?",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "empty fragmet",
+			input:   "https://github.com/octocat/Hello-World#",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid path component",
+			input:   "https://github.com/./Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid path component",
+			input:   "https://github.com/octocat/.",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid path component",
+			input:   "https://github.com/../Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+		{
+			name:    "invalid path component",
+			input:   "https://github.com/octocat/..",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
 	}
 
 	for _, tc := range tests {
