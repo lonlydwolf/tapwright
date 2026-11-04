@@ -1,4 +1,4 @@
-#!/bash/sh
+#!/bin/sh
 
 if ! go build -o /tmp/tapwright .; then
   printf 'FAIL: build failed.\n' >&2
@@ -27,7 +27,7 @@ if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stderr; then
   exit 1
 fi
 
-echo "PASS 1/5"
+echo "PASS 1/6"
 
 /tmp/tapwright inspect >/tmp/tapwright.stdout 2>/tmp/tapwright.stderr
 program_status=$?
@@ -51,7 +51,7 @@ if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stderr; then
   exit 1
 fi
 
-echo "PASS 2/5"
+echo "PASS 2/6"
 
 /tmp/tapwright inspect arg1 arg2 >/tmp/tapwright.stdout 2>/tmp/tapwright.stderr
 program_status=$?
@@ -75,7 +75,7 @@ if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stderr; then
   exit 1
 fi
 
-echo "PASS 3/5"
+echo "PASS 3/6"
 
 /tmp/tapwright inspect invalid_arg >/tmp/tapwright.stdout 2>/tmp/tapwright.stderr
 program_status=$?
@@ -99,7 +99,31 @@ if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stderr; then
   exit 1
 fi
 
-echo "PASS 4/5"
+echo "PASS 4/6"
+
+/tmp/tapwright unknown >/tmp/tapwright.stdout 2>/tmp/tapwright.stderr
+program_status=$?
+
+echo "Testing: \`tapwright unknown\`"
+
+printf 'Unknown command: unknown\n' >/tmp/tapwright.expected
+
+if [ "$program_status" -ne 1 ]; then
+  printf 'FAIL: expected exit status 1; got %s\n' "$program_status" >&2
+  exit 1
+fi
+
+if [ -s /tmp/tapwright.stdout ]; then
+  printf 'FAIL: expected empty stdout.\n' >&2
+  exit 1
+fi
+
+if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stderr; then
+  printf 'FAIL: stderr not matching expected output \n' >&2
+  exit 1
+fi
+
+echo "PASS 5/6"
 
 /tmp/tapwright inspect https://github.com/lonlydwolf/tapwright >/tmp/tapwright.stdout 2>/tmp/tapwright.stderr
 program_status=$?
@@ -123,5 +147,5 @@ if ! cmp -s /tmp/tapwright.expected /tmp/tapwright.stdout; then
   exit 1
 fi
 
-echo "PASS 5/5"
+echo "PASS 6/6"
 exit 0
