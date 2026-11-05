@@ -20,8 +20,8 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, err
 	}
 
-	if parsedURL.Scheme != "https" {
-		return RepoInfo{}, fmt.Errorf("invalid scheme %q: must be https", parsedURL.Scheme)
+	if !strings.HasPrefix(rawURL, "https://") {
+		return RepoInfo{}, fmt.Errorf("invalid scheme %q: must be https://", rawURL)
 	}
 
 	if parsedURL.User != nil {
@@ -60,5 +60,6 @@ func inspect(rawURL string) (RepoInfo, error) {
 		return RepoInfo{}, fmt.Errorf("invalid path %q: each component may contain only ASCII letters, digits, hyphens, underscores, and periods", parsedURL.Path)
 	}
 
-	return RepoInfo{pathParts[1], pathParts[2], rawURL}, err
+	canonicalURL := fmt.Sprintf("https://github.com/%s/%s", pathParts[1], pathParts[2])
+	return RepoInfo{pathParts[1], pathParts[2], canonicalURL}, err
 }
