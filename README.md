@@ -23,11 +23,7 @@ For example, after building Tapwright:
 Output (one JSON object followed by a newline):
 
 ```json
-{
-  "owner": "lonlydwolf",
-  "repository": "tapwright",
-  "canonical_url": "https://github.com/lonlydwolf/tapwright"
-}
+{"owner":"lonlydwolf","repository":"tapwright","canonical_url":"https://github.com/lonlydwolf/tapwright"}
 ```
 
 ### Accepted URLs
@@ -45,15 +41,15 @@ The accepted URL form is exactly `https://github.com/<owner>/<repository>`.
 
 Examples:
 
-| URL                                       | Result                            |
-| ----------------------------------------- | --------------------------------- |
-| `https://github.com/octocat/Hello-World`  | Accepted                          |
-| `https://github.com/octocat/repo_123.git` | Accepted; `.git` is preserved     |
-| `HTTPS://github.com/octocat/repo`         | Rejected; scheme spelling differs |
-| `https://github.com:443/octocat/repo`     | Rejected; port present            |
-| `https://github.com/octocat/%48ello`      | Rejected; encoded path component  |
-| `https://github.com/octocat/repo/`        | Rejected; trailing slash          |
-| `https://github.com/octocat/repo?`        | Rejected; query delimiter         |
+| URL | Result |
+| --- | --- |
+| `https://github.com/octocat/Hello-World` | Accepted |
+| `https://github.com/octocat/repo_123.git` | Accepted; `.git` is preserved |
+| `HTTPS://github.com/octocat/repo` | Rejected; scheme spelling differs |
+| `https://github.com:443/octocat/repo` | Rejected; port present |
+| `https://github.com/octocat/%48ello` | Rejected; encoded path component |
+| `https://github.com/octocat/repo/` | Rejected; trailing slash |
+| `https://github.com/octocat/repo?` | Rejected; query delimiter |
 
 ### Output and exit status
 
