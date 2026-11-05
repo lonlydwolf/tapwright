@@ -82,7 +82,7 @@ program_status=$?
 
 echo "Testing: \`tapwright inspect invalid_arg\`"
 
-printf 'Error: invalid scheme "": must be https\n' >/tmp/tapwright.expected
+printf 'Error: invalid scheme "invalid_arg": must be https://\n' >/tmp/tapwright.expected
 
 if [ "$program_status" -ne 1 ]; then
   printf 'FAIL: expected exit status 1; got %s\n' "$program_status" >&2
