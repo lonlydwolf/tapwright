@@ -219,6 +219,20 @@ func TestInspect(t *testing.T) {
 			want:    RepoInfo{},
 			wantErr: true,
 		},
+
+		{
+			name:    "invalid scheme (case sensitivity)",
+			input:   "HTTPS://github.com/octocat/Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+
+		{
+			name:    "invalid scheme (case sensitivity)",
+			input:   "HtTpS://github.com/octocat/Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
 	}
 
 	for _, tc := range tests {
