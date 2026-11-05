@@ -12,7 +12,7 @@ type testCase struct {
 func TestInspect(t *testing.T) {
 	tests := []testCase{
 		{
-			name:  "valid url",
+			name:  "valid url / standard repo",
 			input: "https://github.com/octocat/Hello-World",
 			want: RepoInfo{
 				Owner:        "octocat",
@@ -21,9 +21,8 @@ func TestInspect(t *testing.T) {
 			},
 			wantErr: false,
 		},
-
 		{
-			name:  "valid url",
+			name:  "valid url / repo with extension",
 			input: "https://github.com/octocat/repo_123.git",
 			want: RepoInfo{
 				Owner:        "octocat",
@@ -32,204 +31,177 @@ func TestInspect(t *testing.T) {
 			},
 			wantErr: false,
 		},
-
 		{
-			name:    "invalid url",
+			name:    "invalid repo / special characters exclamation",
 			input:   "https://github.com/octocat/repo!",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url",
+			name:    "invalid repo / unicode character",
 			input:   "https://github.com/octocat/répo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
 		{
-			name:    "invalid url",
+			name:    "invalid repo / tilde character",
 			input:   "https://github.com/octocat/repo~test",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (Percent-encoded path components)",
+			name:    "invalid path / percent-encoded repository",
 			input:   "https://github.com/octocat/%48ello",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (Percent-encoded path components)",
+			name:    "invalid path / percent-encoded owner",
 			input:   "https://github.com/%6Fctocat/repo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (Percent-encoded path components)",
+			name:    "invalid path / percent-encoded dot in repository",
 			input:   "https://github.com/octocat/repo%2Egit",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid scheme",
+			name:    "invalid scheme / http instead of https",
 			input:   "http://github.com/octocat/Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid host",
+			name:    "invalid host / gitlab instead of github",
 			input:   "https://gitlab.com/octocat/Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (with query)",
+			name:    "invalid url / with query parameters",
 			input:   "https://github.com/octocat/Hello-World?tab=readme",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (with fragmet)",
+			name:    "invalid url / with fragment",
 			input:   "https://github.com/octocat/Hello-World#readme",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (missing repository)",
+			name:    "invalid path / missing repository",
 			input:   "https://github.com/octocat/",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (missing owner)",
+			name:    "invalid path / missing owner",
 			input:   "https://github.com//Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (empty owner and repository)",
+			name:    "invalid path / empty owner and repository",
 			input:   "https://github.com//",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (sub-page)",
+			name:    "invalid path / sub-page path",
 			input:   "https://github.com/octocat/Hello-World/issues",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "embedded user credentials",
+			name:    "invalid url / embedded user credentials",
 			input:   "https://user:pass@github.com/octocat/Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "empty query",
+			name:    "invalid url / empty query",
 			input:   "https://github.com/octocat/Hello-World?",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "empty fragmet",
+			name:    "invalid url / empty fragment",
 			input:   "https://github.com/octocat/Hello-World#",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid path component",
+			name:    "invalid path component / dot owner",
 			input:   "https://github.com/./Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid path component",
+			name:    "invalid path component / dot repository",
 			input:   "https://github.com/octocat/.",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid path component",
+			name:    "invalid path component / double-dot owner",
 			input:   "https://github.com/../Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
 		{
-			name:    "invalid path component",
+			name:    "invalid path component / double-dot repository",
 			input:   "https://github.com/octocat/..",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (with port)",
+			name:    "invalid url / explicit port number",
 			input:   "https://github.com:443/octocat/repo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid path (trailing slashes)",
+			name:    "invalid path / trailing slash",
 			input:   "https://github.com/octocat/repo/",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url (case sensitivity)",
+			name:    "invalid url / uppercase scheme and host",
 			input:   "HTTPS://GitHub.COM/octocat/repo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url",
+			name:    "invalid url / empty host missing authority",
 			input:   "https:///octocat/repo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid url",
-			input:   "https:///octocat/repo",
-			want:    RepoInfo{},
-			wantErr: true,
-		},
-
-		{
-			name:    "invalid url",
+			name:    "invalid path / empty owner segment",
 			input:   "https://github.com//repo",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid scheme (case sensitivity)",
+			name:    "invalid scheme / uppercase HTTPS",
 			input:   "HTTPS://github.com/octocat/Hello-World",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
-
 		{
-			name:    "invalid scheme (case sensitivity)",
+			name:    "invalid scheme / mixed-case HtTpS",
 			input:   "HtTpS://github.com/octocat/Hello-World",
+			want:    RepoInfo{},
+			wantErr: true,
+		},
+		{
+			name:    "invalid url / malformed percent escape",
+			input:   "https://github.com/octocat/repo%GG",
 			want:    RepoInfo{},
 			wantErr: true,
 		},
@@ -247,8 +219,6 @@ func TestInspect(t *testing.T) {
 			if got != tc.want {
 				t.Errorf("inspect() got = %v, want %v", got, tc.want)
 			}
-
 		})
 	}
-
 }
