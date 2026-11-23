@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 var nameRule = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
@@ -27,6 +28,10 @@ func CreateTap(rootPath, user, name string) error {
 
 	if !nameRule.MatchString(name) {
 		return fmt.Errorf("%w %q: use lowercase letters, digits and hyphens", ErrInvalidTapName, name)
+	}
+
+	if strings.HasPrefix(name, "homebrew-") {
+		return fmt.Errorf("%w %q: tap name must not start with `homebrew-`", ErrInvalidTapName, name)
 	}
 
 	root, err := os.OpenRoot(rootPath)
