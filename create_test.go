@@ -302,6 +302,16 @@ func TestCreateTap(t *testing.T) {
 		},
 
 		{
+			name:    "invalid tap - `homwbrew-` prefix",
+			user:    "alice",
+			tap:     "homebrew-tools",
+			wantErr: ErrInvalidTapName,
+			wantAbsent: []string{
+				"alice",
+			},
+		},
+
+		{
 			name:    "invalid user and tap - both empty, user error wins",
 			user:    "",
 			tap:     "",
