@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -107,4 +108,6 @@ func createCMD(user, name string) {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
+
+	fmt.Fprintln(os.Stdout, "Create:", filepath.Join(root, user, name))
 }
