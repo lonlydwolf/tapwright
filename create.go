@@ -18,7 +18,7 @@ var (
 
 const markerContent = "tapwright-tap 1\n"
 
-func CreateTap(root, user, name string) error {
+func CreateTap(rootPath, user, name string) error {
 	if !nameRule.MatchString(user) {
 		return fmt.Errorf("%w %q: use lowercase letters, digits and hyphens", ErrInvalidUserName, user)
 	}
@@ -27,21 +27,26 @@ func CreateTap(root, user, name string) error {
 		return fmt.Errorf("%w %q: use lowercase letters, digits and hyphens", ErrInvalidTapName, name)
 	}
 
-	userDir := filepath.Join(root, user)
-	if err := os.MkdirAll(userDir, 0o755); err != nil {
-		return fmt.Errorf("create user directory %q: %w", userDir, err)
+	root, err := os.OpenRoot(rootPath)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+
+	if err := root.MkdirAll(user, 0o755); err != nil {
+		return fmt.Errorf("create user directory %q: %w", filepath.Join(rootPath, user), err)
 	}
 
-	tapDir := filepath.Join(userDir, "homebrew-"+name)
-	if err := os.Mkdir(tapDir, 0o755); err != nil {
+	tapDir := filepath.Join(user, "homebrew-"+name)
+	if err := root.Mkdir(tapDir, 0o755); err != nil {
 		if errors.Is(err, fs.ErrExist) {
 			return fmt.Errorf("%w: %w", ErrTapExists, err)
 		}
 		return fmt.Errorf("create tap directory %q: %w", tapDir, err)
 	}
 
-	if err := makeContents(tapDir); err != nil {
-		if rmErr := os.RemoveAll(tapDir); rmErr != nil {
+	if err := makeContents(root, tapDir); err != nil {
+		if rmErr := root.RemoveAll(tapDir); rmErr != nil {
 			return errors.Join(err, rmErr)
 		}
 		return err
@@ -50,14 +55,14 @@ func CreateTap(root, user, name string) error {
 	return nil
 }
 
-func makeContents(tapDir string) error {
+func makeContents(root *os.Root, tapDir string) error {
 	caskDir := filepath.Join(tapDir, "Casks")
-	if err := os.Mkdir(caskDir, 0o755); err != nil {
+	if err := root.Mkdir(caskDir, 0o755); err != nil {
 		return fmt.Errorf("create casks directory %q: %w", caskDir, err)
 	}
 
 	tapMarker := filepath.Join(tapDir, ".tapwright")
-	if err := os.WriteFile(tapMarker, []byte(markerContent), 0o644); err != nil {
+	if err := root.WriteFile(tapMarker, []byte(markerContent), 0o644); err != nil {
 		return fmt.Errorf("create tap marker %q: %w", tapMarker, err)
 	}
 
