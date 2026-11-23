@@ -18,6 +18,8 @@ var (
 
 const markerContent = "tapwright-tap 1\n"
 
+var makeContentsFunc = makeContents
+
 func CreateTap(rootPath, user, name string) error {
 	if !nameRule.MatchString(user) {
 		return fmt.Errorf("%w %q: use lowercase letters, digits and hyphens", ErrInvalidUserName, user)
@@ -45,7 +47,7 @@ func CreateTap(rootPath, user, name string) error {
 		return fmt.Errorf("create tap directory %q: %w", tapDir, err)
 	}
 
-	if err := makeContents(root, tapDir); err != nil {
+	if err := makeContentsFunc(root, tapDir); err != nil {
 		if rmErr := root.RemoveAll(tapDir); rmErr != nil {
 			return errors.Join(err, rmErr)
 		}
