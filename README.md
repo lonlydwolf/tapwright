@@ -80,14 +80,14 @@ For example:
 Output on a Mac with Homebrew installed in `/opt/homebrew`:
 
 ```text
-Create: /opt/homebrew/Library/Taps/alice/homebrew-tools
+Created: /opt/homebrew/Library/Taps/alice/homebrew-tools
 ```
 
 ### Taps root
 
 - If the `TAPWRIGHT_TAPS_ROOT` environment variable is set to a non-empty value, that value is used as the taps root.
 - If it is unset or empty, Tapwright asks Homebrew for its taps directory with `brew --taps`. If Homebrew is not in `PATH` or the command fails, `create` exits with an error.
-- If the taps root does not exist, it is created and `Created taps root directory: <root>` is printed to stdout before the `Create:` line. If the path exists but is not a directory, `create` fails.
+- If the taps root does not exist, it is created and `Created taps root directory: <root>` is printed to stdout before the `Created:` line. If the path exists but is not a directory, `create` fails.
 
 ### Names
 
@@ -110,7 +110,7 @@ Create: /opt/homebrew/Library/Taps/alice/homebrew-tools
 
 ### Output and exit status
 
-- **Success:** Exit status `0`; `Create: <path>` is written to stdout, where `<path>` is `<taps-root>/<user>/homebrew-<name>`, built from the taps root as given. A relative `TAPWRIGHT_TAPS_ROOT` gives a relative path, and `..` in the root is shortened as text, without following symlinks, so a root such as `link/..` can print a path other than the one created. Stderr is empty.
+- **Success:** Exit status `0`; `Created: <path>` is written to stdout, where `<path>` is `<taps-root>/<user>/homebrew-<name>`, built from the taps root as given. A relative `TAPWRIGHT_TAPS_ROOT` gives a relative path, and `..` in the root is shortened as text, without following symlinks, so a root such as `link/..` can print a path other than the one created. Stderr is empty.
 - **Failure:** Exit status `1`; an error such as ``Error: invalid tap name "homebrew-tools": tap name must not start with `homebrew-` `` is written to stderr. Stdout is empty, unless the taps root was created before the failure.
 
 `create` takes exactly two arguments. Missing or extra arguments print `Usage: tapwright create <user> <name>` and exit with status `1`.

@@ -171,7 +171,7 @@ test_number=$((test_number + 1))
 
 echo "Testing: \`tapwright create alice tap"
 
-printf 'Create: %s/alice/homebrew-tap\n' "$TAPWRIGHT_TAPS_ROOT" >"$tmp_dir/tapwright.expected"
+printf 'Created: %s/alice/homebrew-tap\n' "$TAPWRIGHT_TAPS_ROOT" >"$tmp_dir/tapwright.expected"
 
 if [ "$program_status" -ne 0 ]; then
   printf 'FAIL: expected exit status 0; got %s\n' "$program_status" >&2
