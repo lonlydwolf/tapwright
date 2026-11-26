@@ -109,5 +109,5 @@ func createCMD(user, name string) {
 		os.Exit(1)
 	}
 
-	fmt.Fprintln(os.Stdout, "Create:", filepath.Join(root, user, name))
+	fmt.Fprintln(os.Stdout, "Create:", filepath.Join(root, user, "homebrew-"+name))
 }
