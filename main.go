@@ -57,7 +57,7 @@ func inspectCMD(arg string) {
 
 func createCMD(user, name string) {
 	root, exists := os.LookupEnv("TAPWRIGHT_TAPS_ROOT")
-	if !exists {
+	if !exists || root == "" {
 		output, err := exec.Command("brew", "--taps").Output()
 		if err != nil {
 			if errors.Is(err, exec.ErrNotFound) {
@@ -75,11 +75,11 @@ func createCMD(user, name string) {
 		}
 
 		root = strings.TrimSpace(string(output))
-	}
+		if root == "" {
+			fmt.Fprintln(os.Stderr, "Error: taps root cannot be empty")
+			os.Exit(1)
+		}
 
-	if root == "" {
-		fmt.Fprintln(os.Stderr, "Error: taps root cannot be empty")
-		os.Exit(1)
 	}
 
 	info, err := os.Stat(root)
