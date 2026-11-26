@@ -2,12 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 func main() {
@@ -56,52 +53,9 @@ func inspectCMD(arg string) {
 }
 
 func createCMD(user, name string) {
-	root, exists := os.LookupEnv("TAPWRIGHT_TAPS_ROOT")
-	if !exists || root == "" {
-		output, err := exec.Command("brew", "--taps").Output()
-		if err != nil {
-			if errors.Is(err, exec.ErrNotFound) {
-				fmt.Fprintln(os.Stderr, "Error: Homebrew not found in PATH")
-			} else {
-				fmt.Fprintf(os.Stderr, "Error: locate Homebrew taps directory: %v\n", err)
-
-				if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
-					if stderr := strings.TrimSpace(string(exitErr.Stderr)); stderr != "" {
-						fmt.Fprintf(os.Stderr, "Homebrew stderr: %s\n", stderr)
-					}
-				}
-			}
-			os.Exit(1)
-		}
-
-		root = strings.TrimSpace(string(output))
-		if root == "" {
-			fmt.Fprintln(os.Stderr, "Error: taps root cannot be empty")
-			os.Exit(1)
-		}
-
-	}
-
-	info, err := os.Stat(root)
-	created := errors.Is(err, os.ErrNotExist)
-
-	if err != nil && !created {
-		fmt.Fprintf(os.Stderr, "Error: check taps root %q: %v\n", root, err)
-		os.Exit(1)
-	}
-
-	if err == nil && !info.IsDir() {
-		fmt.Fprintf(os.Stderr, "Error: taps root %q is not a directory\n", root)
-		os.Exit(1)
-	}
-
-	if err := os.MkdirAll(root, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: create taps root %q: %v\n", root, err)
-		os.Exit(1)
-	}
-
-	if created {
-		fmt.Printf("Created taps root directory: %s\n", root)
+	root := os.Getenv("TAPWRIGHT_TAPS_ROOT")
+	if root == "" {
+		root = "/opt/homebrew/Library/Taps"
 	}
 
 	if err := CreateTap(root, user, name); err != nil {
@@ -109,5 +63,5 @@ func createCMD(user, name string) {
 		os.Exit(1)
 	}
 
-	fmt.Fprintln(os.Stdout, "Created:", filepath.Join(root, user, "homebrew-"+name))
+	fmt.Fprintln(os.Stdout, filepath.Join(root, user, "homebrew-"+name))
 }

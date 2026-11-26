@@ -12,9 +12,10 @@ import (
 
 var nameRule = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 var (
-	ErrInvalidUserName = errors.New("invalid user name")
-	ErrInvalidTapName  = errors.New("invalid tap name")
-	ErrTapExists       = errors.New("tap already exists")
+	ErrInvalidUserName     = errors.New("invalid user name")
+	ErrInvalidTapName      = errors.New("invalid tap name")
+	ErrTapExists           = errors.New("tap already exists")
+	ErrTapsRootUnavailable = errors.New("taps root unavailable")
 )
 
 const markerContent = "tapwright-tap 1\n"
@@ -36,7 +37,7 @@ func CreateTap(rootPath, user, name string) error {
 
 	root, err := os.OpenRoot(rootPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w %q: %w", ErrTapsRootUnavailable, rootPath, err)
 	}
 	defer root.Close()
 

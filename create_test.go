@@ -302,7 +302,7 @@ func TestCreateTap(t *testing.T) {
 		},
 
 		{
-			name:    "invalid tap - `homwbrew-` prefix",
+			name:    "invalid tap - `homebrew-` prefix",
 			user:    "alice",
 			tap:     "homebrew-tools",
 			wantErr: ErrInvalidTapName,
@@ -409,6 +409,37 @@ func TestCreateTap(t *testing.T) {
 				"lonlydwolf/homebrew-tools/Casks",
 			},
 		},
+
+		{
+			name:       "unavailable tap root - nonexistent directory",
+			user:       "alice",
+			tap:        "tap",
+			wantErr:    ErrTapsRootUnavailable,
+			wantAbsent: []string{"."},
+			setup: func(t *testing.T, root string) {
+				if err := os.Remove(root); err != nil {
+					t.Fatalf("setup: %v", err)
+				}
+			},
+		},
+
+		{
+			name:    "unavailable tap root - regular file",
+			user:    "alice",
+			tap:     "tap",
+			wantErr: ErrTapsRootUnavailable,
+			setup: func(t *testing.T, root string) {
+				if err := os.Remove(root); err != nil {
+					t.Fatalf("setup: %v", err)
+				}
+				if err := os.WriteFile(root, []byte("sentinel"), 0o644); err != nil {
+					t.Fatalf("setup: %v", err)
+				}
+			},
+			wantFiles: map[string]string{
+				".": "sentinel",
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -461,17 +492,19 @@ func TestCreateTap(t *testing.T) {
 				allowed[rel] = true
 			}
 
-			err = fs.WalkDir(os.DirFS(root), ".", func(path string, d fs.DirEntry, err error) error {
+			if !errors.Is(tc.wantErr, ErrTapsRootUnavailable) {
+				err = fs.WalkDir(os.DirFS(root), ".", func(path string, d fs.DirEntry, err error) error {
+					if err != nil {
+						return err
+					}
+					if path != "." && !allowed[path] {
+						t.Errorf("CreateTap() left unexpected entry %q in the tap root", path)
+					}
+					return nil
+				})
 				if err != nil {
-					return err
+					t.Fatalf("walk %s: %v", root, err)
 				}
-				if path != "." && !allowed[path] {
-					t.Errorf("CreateTap() left unexpected entry %q in the tap root", path)
-				}
-				return nil
-			})
-			if err != nil {
-				t.Fatalf("walk %s: %v", root, err)
 			}
 		})
 	}

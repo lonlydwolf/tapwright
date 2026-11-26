@@ -5,7 +5,7 @@ A Go CLI for managing a local personal Homebrew tap.
 Tapwright is in early development. It currently supports two commands:
 
 - `tapwright inspect <repository-url>`: **offline GitHub repository inspection**.
-- `tapwright create <user> <name>`: **scaffolding a new local tap** under the Homebrew taps directory.
+- `tapwright create <user> <name>`: **scaffolding a new local tap** under an existing taps directory.
 
 Formula and cask management are planned but are not implemented yet.
 
@@ -69,7 +69,7 @@ Examples:
 tapwright create <user> <name>
 ```
 
-It creates an empty tap at `<taps-root>/<user>/homebrew-<name>`, the layout Homebrew uses for a tap named `<user>/<name>`. You give the short name; Tapwright adds the `homebrew-` prefix.
+It creates a new tap directory at `<taps-root>/<user>/homebrew-<name>`, the layout Homebrew uses for a tap named `<user>/<name>`. You give the short name; Tapwright adds the `homebrew-` prefix.
 
 For example:
 
@@ -77,17 +77,21 @@ For example:
 ./tapwright create alice tools
 ```
 
-Output on a Mac with Homebrew installed in `/opt/homebrew`:
+Output when using the default taps root:
 
 ```text
-Created: /opt/homebrew/Library/Taps/alice/homebrew-tools
+/opt/homebrew/Library/Taps/alice/homebrew-tools
 ```
 
 ### Taps root
 
-- If the `TAPWRIGHT_TAPS_ROOT` environment variable is set to a non-empty value, that value is used as the taps root.
-- If it is unset or empty, Tapwright asks Homebrew for its taps directory with `brew --taps`. If Homebrew is not in `PATH` or the command fails, `create` exits with an error.
-- If the taps root does not exist, it is created and `Created taps root directory: <root>` is printed to stdout before the `Created:` line. If the path exists but is not a directory, `create` fails.
+- If the `TAPWRIGHT_TAPS_ROOT` environment variable is nonempty, its value is used as the taps root.
+- If the variable is unset or empty, the default is `/opt/homebrew/Library/Taps`.
+- The taps root must already exist and be an accessible directory.
+- Tapwright does not create the taps root automatically.
+- If the taps root cannot be opened, `create` fails with a `taps root unavailable` error.
+
+Tapwright does not invoke Homebrew to discover the taps directory. For non-default Homebrew installations or standalone local use, specify the taps root through `TAPWRIGHT_TAPS_ROOT`.
 
 ### Names
 
@@ -104,15 +108,21 @@ Created: /opt/homebrew/Library/Taps/alice/homebrew-tools
 
 - The `<user>` directory is created if it does not exist.
 - `.tapwright` is a marker file that identifies the directory as a Tapwright-managed tap.
-- If the tap directory already exists, `create` fails with `tap already exists` and leaves it untouched.
-- All writes stay inside the taps root. A `<user>` directory that is a symlink pointing outside the root is rejected.
-- If creating the contents fails partway, the new tap directory is removed again.
-- `create` only creates local directories and files. It does not run `brew tap`, and it never modifies an existing tap.
+- If the target tap already exists, `create` fails with `tap already exists` and leaves it untouched.
+- Filesystem operations are confined to the taps root. A `<user>` directory that is a symlink pointing outside the root is rejected.
+- If creating the tap contents fails partway, Tapwright attempts to remove the newly created tap directory. A newly created user directory may remain.
+- Tapwright does not initialize a Git repository.
+- `create` does not run `brew tap`, and it never modifies an existing tap.
 
 ### Output and exit status
 
-- **Success:** Exit status `0`; `Created: <path>` is written to stdout, where `<path>` is `<taps-root>/<user>/homebrew-<name>`, built from the taps root as given. A relative `TAPWRIGHT_TAPS_ROOT` gives a relative path, and `..` in the root is shortened as text, without following symlinks, so a root such as `link/..` can print a path other than the one created. Stderr is empty.
-- **Failure:** Exit status `1`; an error such as ``Error: invalid tap name "homebrew-tools": tap name must not start with `homebrew-` `` is written to stderr. Stdout is empty, unless the taps root was created before the failure.
+- **Success:** Exit status `0`; the path of the new tap directory is written to stdout, followed by a newline. Stderr is empty.
+- **Failure:** Exit status `1`; a useful error describing the problem is written to stderr. Stdout is empty.
+
+The output path is constructed using `filepath.Join` and may be relative
+or absolute depending on the supplied taps root. It is lexically cleaned
+without resolving symlinks, so roots containing symlinks and `..` may
+produce an output path that differs from the actual location.
 
 `create` takes exactly two arguments. Missing or extra arguments print `Usage: tapwright create <user> <name>` and exit with status `1`.
 
@@ -125,6 +135,7 @@ The CLI accepts exactly the `inspect` and `create` subcommands. Running `tapwrig
 ### Requirements
 
 - Go **1.27.2 or newer** (the version declared in `go.mod` is `1.27.2`).
+- An existing taps directory when using `create`.
 
 ### Build
 
@@ -138,8 +149,22 @@ The generated `tapwright` executable is a local build artifact, not source code.
 
 ### Run
 
+Inspect a repository:
+
 ```sh
 ./tapwright inspect https://github.com/octocat/Hello-World
+```
+
+Create a tap using the default taps root (this writes to your real Homebrew taps directory):
+
+```sh
+./tapwright create alice tools
+```
+
+Create a tap using a custom taps root:
+
+```sh
+mkdir -p "$PWD/taps"
 TAPWRIGHT_TAPS_ROOT="$PWD/taps" ./tapwright create alice tools
 ```
 
@@ -153,7 +178,9 @@ go test -v ./...
 bash scripts/check-cli.sh
 ```
 
-The CLI script requires Bash. It builds an executable in a temporary directory and verifies process exit codes, stdout, and stderr for both successful and rejected invocations of `inspect` and `create`. It points `TAPWRIGHT_TAPS_ROOT` at a temporary directory, so it never writes to your real Homebrew taps directory, and it removes all its files on exit. GitHub Actions runs Go build, unit tests, and CLI checks for pull requests targeting `main`.
+The CLI script requires Bash. It builds an executable in a temporary directory and verifies process exit codes, stdout, and stderr for both successful and rejected invocations of `inspect` and `create`.
+
+The script uses temporary taps root paths, so it never writes to your real Homebrew taps directory, and removes its temporary files on exit.
 
 ## Roadmap
 
