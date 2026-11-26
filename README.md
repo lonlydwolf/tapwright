@@ -2,11 +2,16 @@
 
 A Go CLI for managing a local personal Homebrew tap.
 
-Tapwright is in early development. Its first implemented capability is **offline GitHub repository inspection**. Homebrew tap and formula management are planned but are not implemented yet.
+Tapwright is in early development. It currently supports two commands:
+
+- `tapwright inspect <repository-url>`: **offline GitHub repository inspection**.
+- `tapwright create <user> <name>`: **scaffolding a new local tap** under the Homebrew taps directory.
+
+Formula and cask management are planned but are not implemented yet.
 
 ## Repository inspection
 
-The currently supported command is:
+The command is:
 
 ```text
 tapwright inspect <repository-url>
@@ -56,7 +61,63 @@ Examples:
 - **Success:** Exit status `0`; a single JSON object containing exactly the string fields `owner`, `repository`, and `canonical_url` is written to stdout, followed by a newline. Stderr is empty. JSON field order and whitespace are not part of the contract.
 - **Failure:** Exit status `1`; a useful error describing the argument or URL problem is written to stderr. Stdout is empty.
 
-The CLI accepts exactly the `inspect` subcommand with one URL argument. Missing arguments, unknown subcommands, and extra arguments are errors. Flags and help commands are not part of the current interface.
+`inspect` takes exactly one URL argument. Missing or extra arguments are errors.
+
+## Tap creation
+
+```text
+tapwright create <user> <name>
+```
+
+It creates an empty tap at `<taps-root>/<user>/homebrew-<name>`, the layout Homebrew uses for a tap named `<user>/<name>`. You give the short name; Tapwright adds the `homebrew-` prefix.
+
+For example:
+
+```sh
+./tapwright create alice tools
+```
+
+Output on a Mac with Homebrew installed in `/opt/homebrew`:
+
+```text
+Create: /opt/homebrew/Library/Taps/alice/homebrew-tools
+```
+
+### Taps root
+
+- If the `TAPWRIGHT_TAPS_ROOT` environment variable is set, its value is used as the taps root. Setting it to an empty string is an error.
+- Otherwise Tapwright asks Homebrew for its taps directory with `brew --taps`. If Homebrew is not in `PATH` or the command fails, `create` exits with an error.
+- If the taps root does not exist, it is created and `Created taps root directory: <root>` is printed to stdout before the `Create:` line. If the path exists but is not a directory, `create` fails.
+
+### Names
+
+- `<user>` and `<name>` must each be one or more segments of lowercase ASCII letters (`a–z`) and digits (`0–9`), separated by single hyphens. Leading, trailing, or consecutive hyphens, uppercase letters, underscores, dots, slashes, spaces, and other characters are rejected.
+- `<name>` must not start with `homebrew-`, because the prefix is added for you. For example, `tapwright create alice homebrew-tools` is rejected.
+
+### What gets created
+
+```text
+<taps-root>/<user>/homebrew-<name>/
+├── Casks/
+└── .tapwright
+```
+
+- The `<user>` directory is created if it does not exist.
+- `.tapwright` is a marker file that identifies the directory as a Tapwright-managed tap.
+- If the tap directory already exists, `create` fails with `tap already exists` and leaves it untouched.
+- All writes stay inside the taps root. A `<user>` directory that is a symlink pointing outside the root is rejected.
+- If creating the contents fails partway, the new tap directory is removed again.
+
+### Output and exit status
+
+- **Success:** Exit status `0`; `Create: <path>` is written to stdout, where `<path>` is the full path of the new tap directory. Stderr is empty.
+- **Failure:** Exit status `1`; an error such as ``Error: invalid tap name "homebrew-tools": tap name must not start with `homebrew-` `` is written to stderr. Stdout is empty, unless the taps root was created before the failure.
+
+`create` takes exactly two arguments. Missing or extra arguments print `Usage: tapwright create <user> <name>` and exit with status `1`.
+
+## Command-line interface
+
+The CLI accepts exactly the `inspect` and `create` subcommands. Running `tapwright` with no command and running an unknown command are errors (exit status `1`). Flags and help commands are not part of the current interface.
 
 ## Getting started
 
@@ -78,6 +139,7 @@ The generated `tapwright` executable is a local build artifact, not source code.
 
 ```sh
 ./tapwright inspect https://github.com/octocat/Hello-World
+TAPWRIGHT_TAPS_ROOT="$PWD/taps" ./tapwright create alice tools
 ```
 
 ## Development checks
@@ -87,17 +149,17 @@ Run from the repository root:
 ```sh
 go build ./...
 go test -v ./...
-sh scripts/check-cli.sh
+bash scripts/check-cli.sh
 ```
 
-The CLI script builds an executable and verifies process exit codes, stdout, and stderr for both successful and rejected invocations. GitHub Actions runs Go build, unit tests, and CLI checks for pull requests targeting `main`.
+The CLI script requires Bash. It builds an executable in a temporary directory and verifies process exit codes, stdout, and stderr for both successful and rejected invocations of `inspect` and `create`. It points `TAPWRIGHT_TAPS_ROOT` at a temporary directory, so it never writes to your real Homebrew taps directory, and it removes all its files on exit. GitHub Actions runs Go build, unit tests, and CLI checks for pull requests targeting `main`.
 
 ## Roadmap
 
 Planned future work includes:
 
 - GitHub release discovery and metadata retrieval.
-- Homebrew formula generation and maintenance.
-- Local personal tap maintenance.
+- Homebrew formula and cask generation and maintenance.
+- Maintenance of existing local taps beyond initial creation.
 
 These capabilities are **not yet implemented**.
