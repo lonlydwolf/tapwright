@@ -107,6 +107,7 @@ Created: /opt/homebrew/Library/Taps/alice/homebrew-tools
 - If the tap directory already exists, `create` fails with `tap already exists` and leaves it untouched.
 - All writes stay inside the taps root. A `<user>` directory that is a symlink pointing outside the root is rejected.
 - If creating the contents fails partway, the new tap directory is removed again.
+- `create` only creates local directories and files. It does not run `brew tap`, and it never modifies an existing tap.
 
 ### Output and exit status
 
