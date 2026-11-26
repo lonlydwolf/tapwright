@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -25,6 +26,14 @@ func main() {
 
 		inspectCMD(args[1])
 
+	case "create":
+		if len(args) != 3 {
+			fmt.Fprintln(os.Stderr, "Usage: tapwright create <user> <name>")
+			os.Exit(1)
+		}
+
+		createCMD(args[1], args[2])
+
 	default:
 		fmt.Fprintln(os.Stderr, "Unknown command:", command)
 		os.Exit(1)
@@ -41,4 +50,18 @@ func inspectCMD(arg string) {
 		os.Exit(1)
 	}
 
+}
+
+func createCMD(user, name string) {
+	root := os.Getenv("TAPWRIGHT_TAPS_ROOT")
+	if root == "" {
+		root = "/opt/homebrew/Library/Taps"
+	}
+
+	if err := CreateTap(root, user, name); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+
+	fmt.Fprintln(os.Stdout, filepath.Join(root, user, "homebrew-"+name))
 }

@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-type testCase struct {
+type inspectTestCase struct {
 	name    string
 	input   string
 	want    RepoInfo
@@ -10,7 +10,7 @@ type testCase struct {
 }
 
 func TestInspect(t *testing.T) {
-	tests := []testCase{
+	tests := []inspectTestCase{
 		{
 			name:  "valid url / standard repo",
 			input: "https://github.com/octocat/Hello-World",
