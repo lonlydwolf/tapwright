@@ -26,4 +26,4 @@ jobs:
         run: go test -v ./...
 
       - name: Check CLI behavior
-        run: sh scripts/check-cli.sh
+        run: bash scripts/check-cli.sh
