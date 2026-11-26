@@ -85,8 +85,8 @@ Create: /opt/homebrew/Library/Taps/alice/homebrew-tools
 
 ### Taps root
 
-- If the `TAPWRIGHT_TAPS_ROOT` environment variable is set, its value is used as the taps root. Setting it to an empty string is an error.
-- Otherwise Tapwright asks Homebrew for its taps directory with `brew --taps`. If Homebrew is not in `PATH` or the command fails, `create` exits with an error.
+- If the `TAPWRIGHT_TAPS_ROOT` environment variable is set to a non-empty value, that value is used as the taps root.
+- If it is unset or empty, Tapwright asks Homebrew for its taps directory with `brew --taps`. If Homebrew is not in `PATH` or the command fails, `create` exits with an error.
 - If the taps root does not exist, it is created and `Created taps root directory: <root>` is printed to stdout before the `Create:` line. If the path exists but is not a directory, `create` fails.
 
 ### Names
